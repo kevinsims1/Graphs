@@ -1,3 +1,19 @@
+from random import randint
+
+class Queue():
+    def __init__(self):
+        self.queue = []
+    def enqueue(self, value):
+        self.queue.append(value)
+    def dequeue(self):
+        if self.size() > 0:
+            return self.queue.pop(0)
+        else:
+            return None
+    def size(self):
+        return len(self.queue)
+
+
 class User:
     def __init__(self, name):
         self.name = name
@@ -14,11 +30,14 @@ class SocialGraph:
         """
         if user_id == friend_id:
             print("WARNING: You cannot be friends with yourself")
+            return False
         elif friend_id in self.friendships[user_id] or user_id in self.friendships[friend_id]:
             print("WARNING: Friendship already exists")
+            return False
         else:
             self.friendships[user_id].add(friend_id)
             self.friendships[friend_id].add(user_id)
+            return True
 
     def add_user(self, name):
         """
@@ -43,10 +62,22 @@ class SocialGraph:
         self.users = {}
         self.friendships = {}
         # !!!! IMPLEMENT ME
-
-        # Add users
-
+        # Add Users
+        for i in range(num_users):
+            self.add_user(f"User {i + 1}")
+  
         # Create friendships
+        target_friendships = (num_users * avg_friendships)
+        total_friendships = 0
+        collisions = 0
+        while total_friendships < target_friendships:
+            #Create random friendships
+            user_id = randint(1, self.last_id)
+            friend_id = randint(1, self.last_id)
+            if self.add_friendship(user_id, friend_id):
+                total_friendships += 2
+            else:
+                collisions += 1
 
     def get_all_social_paths(self, user_id):
         """
@@ -57,8 +88,32 @@ class SocialGraph:
 
         The key is the friend's ID and the value is the path.
         """
+        # Note: Every means traversal
         visited = {}  # Note that this is a dictionary, not a set
         # !!!! IMPLEMENT ME
+        # Create Queue
+        queue = Queue()
+
+        # Enqueue starting point in a list to start a path
+        queue.enqueue([user_id])
+        # While queue not empty
+        while queue.size() > 0:
+            # Dequeue
+            path = queue.dequeue()
+
+            # Find the last vertex in path
+            current_friend = path[-1]
+
+            # If we haven't visited the vertex
+            if current_friend not in visited:
+                # Do the thing
+                # Add to visited 
+                visited[current_friend] = path
+                # Make new paths(copy) and enqueue for each vertex
+                for friend_id in self.friendships[current_friend]:
+                    new_path = list(path)
+                    new_path.append(friend_id)
+                    queue.enqueue(new_path)
         return visited
 
 
